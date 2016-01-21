@@ -1,8 +1,6 @@
 ![Model](https://raw.githubusercontent.com/3lvis/SyncAppNetDemo/master/Images/app.png)
 
-## JSON
-
-[Reference](https://api.app.net/posts/stream/global)
+## [JSON](https://api.app.net/posts/stream/global)
 
 ```json
 {

@@ -1,3 +1,5 @@
+This app demostrates how to use the [Sync](https://github.com/hyperoslo/Sync) library in Swift, it also uses Alamofire, although that's not a requirement.
+
 ![Model](https://raw.githubusercontent.com/3lvis/SyncAppNetDemo/master/Images/app.png)
 
 ## [JSON](https://api.app.net/posts/stream/global)

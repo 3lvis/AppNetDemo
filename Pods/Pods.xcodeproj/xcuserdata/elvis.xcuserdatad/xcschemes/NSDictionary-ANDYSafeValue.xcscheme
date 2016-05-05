@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '543AE48F4DE4B30E24832C0E'
+               BlueprintIdentifier = '67979FA7D8E24F5A114DF1FB'
                BlueprintName = 'NSDictionary-ANDYSafeValue'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'NSDictionary_ANDYSafeValue.framework'>

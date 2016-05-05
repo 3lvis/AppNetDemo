@@ -4,7 +4,7 @@
 
 @implementation NSEntityDescription (SYNCPrimaryKey)
 
-- (NSAttributeDescription *)sync_primaryKeyAttribute {
+- (nonnull NSAttributeDescription *)sync_primaryKeyAttribute {
     __block NSAttributeDescription *primaryKeyAttribute;
 
     [self.propertiesByName enumerateKeysAndObjectsUsingBlock:^(NSString *key,
@@ -26,14 +26,14 @@
     return primaryKeyAttribute;
 }
 
-- (NSString *)sync_localKey {
+- (nonnull NSString *)sync_localKey {
     NSAttributeDescription *primaryAttribute = [self sync_primaryKeyAttribute];
     NSString *localKey = primaryAttribute.name;
 
     return localKey;
 }
 
-- (NSString *)sync_remoteKey {
+- (nonnull NSString *)sync_remoteKey {
     NSAttributeDescription *primaryAttribute = [self sync_primaryKeyAttribute];
     NSString *remoteKey = primaryAttribute.userInfo[SYNCCustomRemoteKey];
 

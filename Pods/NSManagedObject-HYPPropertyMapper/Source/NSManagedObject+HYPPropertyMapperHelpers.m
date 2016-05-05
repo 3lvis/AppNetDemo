@@ -10,7 +10,6 @@
                      dateFormatter:(NSDateFormatter *)dateFormatter
                   relationshipType:(HYPPropertyMapperRelationshipType)relationshipType {
     id value;
-
     if (attributeDescription.attributeType != NSTransformableAttributeType) {
         value = [self valueForKey:attributeDescription.name];
         BOOL nilOrNullValue = (!value ||
@@ -34,13 +33,26 @@
 
             NSDictionary *userInfo = [self.entity.propertiesByName[attributeDescription.name] userInfo];
             NSString *customRemoteKey = userInfo[HYPPropertyMapperCustomRemoteKey];
-            if (customRemoteKey.length > 0 && [customRemoteKey isEqualToString:remoteKey]) {
-                foundAttributeDescription = self.entity.propertiesByName[attributeDescription.name];
-            } else if ([attributeDescription.name isEqualToString:[remoteKey hyp_localString]]) {
+            BOOL currentAttributeHasTheSameRemoteKey = (customRemoteKey.length > 0 && [customRemoteKey isEqualToString:remoteKey]);
+            if (currentAttributeHasTheSameRemoteKey) {
                 foundAttributeDescription = attributeDescription;
+                *stop = YES;
+            }
+            
+            if ([attributeDescription.name isEqualToString:remoteKey]) {
+                foundAttributeDescription = attributeDescription;
+                *stop = YES;
             }
 
-            if (foundAttributeDescription) {
+            NSString *localKey = [remoteKey hyp_localString];
+            BOOL isReservedKey = ([[NSManagedObject reservedAttributes] containsObject:remoteKey]);
+            if (isReservedKey) {
+                NSString *prefixedRemoteKey = [self prefixedAttribute:remoteKey];
+                localKey = [prefixedRemoteKey hyp_localString];
+            }
+
+            if ([attributeDescription.name isEqualToString:localKey]) {
+                foundAttributeDescription = attributeDescription;
                 *stop = YES;
             }
         }
@@ -110,21 +122,27 @@
         value = remoteValue;
     }
 
-    BOOL stringValueAndNumberAttribute = ([remoteValue isKindOfClass:[NSString class]] &&
+    BOOL stringValueAndNumberAttribute  = ([remoteValue isKindOfClass:[NSString class]] &&
                                           attributedClass == [NSNumber class]);
 
-    BOOL numberValueAndStringAttribute = ([remoteValue isKindOfClass:[NSNumber class]] &&
+    BOOL numberValueAndStringAttribute  = ([remoteValue isKindOfClass:[NSNumber class]] &&
                                           attributedClass == [NSString class]);
 
-    BOOL stringValueAndDateAttribute   = ([remoteValue isKindOfClass:[NSString class]] &&
+    BOOL stringValueAndDateAttribute    = ([remoteValue isKindOfClass:[NSString class]] &&
                                           attributedClass == [NSDate class]);
 
-    BOOL numberValueAndDateAttribute   = ([remoteValue isKindOfClass:[NSNumber class]] &&
+    BOOL numberValueAndDateAttribute    = ([remoteValue isKindOfClass:[NSNumber class]] &&
                                           attributedClass == [NSDate class]);
 
-    BOOL arrayOrDictionaryValueAndDataAttribute   = (([remoteValue isKindOfClass:[NSArray class]] ||
-                                                      [remoteValue isKindOfClass:[NSDictionary class]]) &&
-                                                     attributedClass == [NSData class]);
+    BOOL dataAttribute                  = (attributedClass == [NSData class]);
+
+    BOOL numberValueAndDecimalAttribute = ([remoteValue isKindOfClass:[NSNumber class]] &&
+                                           attributedClass == [NSDecimalNumber class]);
+
+    BOOL stringValueAndDecimalAttribute = ([remoteValue isKindOfClass:[NSString class]] &&
+                                           attributedClass == [NSDecimalNumber class]);
+
+    BOOL transformableAttribute         = (!attributedClass && [attributeDescription valueTransformerName] && value == nil);
 
     if (stringValueAndNumberAttribute) {
         NSNumberFormatter *formatter = [NSNumberFormatter new];
@@ -136,8 +154,21 @@
         value = [NSDate hyp_dateFromDateString:remoteValue];
     } else if (numberValueAndDateAttribute) {
         value = [NSDate hyp_dateFromUnixTimestampNumber:remoteValue];
-    } else if (arrayOrDictionaryValueAndDataAttribute) {
+    } else if (dataAttribute) {
         value = [NSKeyedArchiver archivedDataWithRootObject:remoteValue];
+    } else if (numberValueAndDecimalAttribute) {
+        NSNumber *number = (NSNumber *)remoteValue;
+        value = [NSDecimalNumber decimalNumberWithDecimal:[number decimalValue]];
+    } else if (stringValueAndDecimalAttribute) {
+        value = [NSDecimalNumber decimalNumberWithString:remoteValue];
+    } else if (transformableAttribute) {
+        NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName:[attributeDescription valueTransformerName]];
+        if (transformer) {
+            id newValue = [transformer transformedValue:remoteValue];
+            if (newValue) {
+                value = newValue;
+            }
+        }
     }
 
     return value;

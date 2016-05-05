@@ -19,7 +19,7 @@ extension DATASource: UITableViewDataSource {
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(self.cellIdentifier, forIndexPath: indexPath)
 
-        self.configureCell(cell, indexPath: indexPath)
+        self.configure(cell: cell, indexPath: indexPath)
 
         return cell
     }
@@ -64,7 +64,7 @@ extension DATASource: UITableViewDataSource {
     public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         var resultTitle: String?
 
-        if self.delegate?.respondsToSelector("dataSource:tableView:titleForHeaderInSection:") == true {
+        if self.delegate?.respondsToSelector(#selector(DATASourceDelegate.dataSource(_:tableView:titleForHeaderInSection:))) == true {
             resultTitle = self.delegate?.dataSource?(self, tableView: tableView, titleForHeaderInSection: section)
         } else if let sections = self.fetchedResultsController.sections {
             resultTitle = sections[section].name

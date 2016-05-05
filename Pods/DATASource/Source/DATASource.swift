@@ -48,10 +48,10 @@ public class DATASource: NSObject {
         self.fetch()
     }
 
-    internal weak var tableView: UITableView?
-    internal weak var collectionView: UICollectionView?
+    weak var tableView: UITableView?
+    weak var collectionView: UICollectionView?
     private var sectionName: String?
-    internal var cellIdentifier: String
+    var cellIdentifier: String
     private weak var mainContext: NSManagedObjectContext?
     private var tableConfigurationBlock: ((cell: UITableViewCell, item: NSManagedObject, indexPath: NSIndexPath) -> ())?
     private var collectionConfigurationBlock: ((cell: UICollectionViewCell, item: NSManagedObject, indexPath: NSIndexPath) -> ())?
@@ -61,18 +61,23 @@ public class DATASource: NSObject {
      */
     public weak var delegate: DATASourceDelegate?
 
-    internal var fetchedResultsController: NSFetchedResultsController
+    /**
+     Dictionary to configurate the different animations to be applied by each change type.
+    */
+    public var animations: [NSFetchedResultsChangeType: UITableViewRowAnimation]?
 
-    internal lazy var objectChanges: [NSFetchedResultsChangeType : [NSIndexPath]] = {
-        return [NSFetchedResultsChangeType : [NSIndexPath]]()
+    var fetchedResultsController: NSFetchedResultsController
+
+    lazy var objectChanges: [NSFetchedResultsChangeType : Set<NSIndexPath>] = {
+        return [NSFetchedResultsChangeType : Set<NSIndexPath>]()
 
     }()
 
-    internal lazy var sectionChanges: [NSFetchedResultsChangeType : NSMutableIndexSet] = {
+    lazy var sectionChanges: [NSFetchedResultsChangeType : NSMutableIndexSet] = {
         return [NSFetchedResultsChangeType : NSMutableIndexSet]()
     }()
 
-    internal lazy var cachedSectionNames: [AnyObject] = {
+    lazy var cachedSectionNames: [AnyObject] = {
         return [AnyObject]()
     }()
 
@@ -89,14 +94,24 @@ public class DATASource: NSObject {
             self.fetchedResultsController.fetchRequest.predicate = newValue
             self.fetch()
             self.tableView?.reloadData()
-            self.collectionView?.reloadData()
+
+            if let visibleIndexPaths = self.collectionView?.indexPathsForVisibleItems() where visibleIndexPaths.count > 0 {
+                self.collectionView?.reloadItemsAtIndexPaths(visibleIndexPaths)
+            }
         }
     }
 
     /**
      The number of objects fetched by DATASource.
      */
-    public var objectsCount: Int {
+    @available(*, deprecated=5.6.3, message="Use `count` instead") public var objectsCount: Int {
+        return self.count
+    }
+
+    /**
+     The number of objects fetched by DATASource.
+     */
+    public var count: Int {
         return self.fetchedResultsController.fetchedObjects?.count ?? 0
     }
 
@@ -111,8 +126,16 @@ public class DATASource: NSObject {
     /**
      The objects fetched by DATASource. This is an array of `NSManagedObject`.
      */
+    // Meant to be a Objective-C compatibility later for `all`
     public var objects: [NSManagedObject] {
-        return self.fetchedResultsController.fetchedObjects as?  [NSManagedObject] ?? [NSManagedObject]()
+        return all()
+    }
+
+    /**
+     All the objects fetched by DATASource. This is an array of `NSManagedObject`.
+     */
+    public func all<T: NSManagedObject>() -> [T] {
+        return self.fetchedResultsController.fetchedObjects as?  [T] ?? [T]()
     }
 
     /**
@@ -120,9 +143,20 @@ public class DATASource: NSObject {
      - parameter indexPath: An index path used to fetch an specific object.
      - returns: The object at a given index path in the fetch results.
      */
+    // Meant to be a Objective-C compatibility later for object(indexPath: indexPath)
     public func objectAtIndexPath(indexPath: NSIndexPath) -> NSManagedObject? {
+        return object(indexPath: indexPath)
+    }
+
+    /**
+     Returns the object for a given index path.
+     - parameter indexPath: An index path used to fetch an specific object.
+     - returns: The object at a given index path in the fetch results.
+     */
+    public func object<T: NSManagedObject>(indexPath indexPath: NSIndexPath) -> T? {
         if self.fetchedResultsController.fetchedObjects?.count > 0 {
-            return self.fetchedResultsController.objectAtIndexPath(indexPath) as? NSManagedObject ?? nil
+            guard let object = self.fetchedResultsController.objectAtIndexPath(indexPath) as? T else { fatalError("Couldn't cast object") }
+            return object
         }
 
         return nil
@@ -133,7 +167,18 @@ public class DATASource: NSObject {
      - parameter object: An object in the receiver’s fetch results.
      - returns: The index path of object in the receiver’s fetch results, or nil if object could not be found.
      */
+    //
+    // Meant to be a Objective-C compatibility later for `indexPath(object: object)`
     public func indexPathForObject(object: NSManagedObject) -> NSIndexPath? {
+        return self.indexPath(object: object)
+    }
+
+    /**
+     Returns the index path of a given managed object.
+     - parameter object: An object in the receiver’s fetch results.
+     - returns: The index path of object in the receiver’s fetch results, or nil if object could not be found.
+     */
+    public func indexPath(object object: NSManagedObject) -> NSIndexPath? {
         return self.fetchedResultsController.indexPathForObject(object) ?? nil
     }
 
@@ -153,11 +198,21 @@ public class DATASource: NSObject {
      - parameter section: The section used to retrieve the title.
      - returns: The title for the requested section, returns `nil` if the section is not present.
      */
+    // Meant to be a Objective-C compatibility later for `titleForHeader(section: section)`
     public func titleForHeaderInSection(section: Int) -> String? {
+        return self.titleForHeader(section: section)
+    }
+
+    /**
+     Returns the title of a given section. Uses given `sectionName` in the initializer to do this lookup.
+     - parameter section: The section used to retrieve the title.
+     - returns: The title for the requested section, returns `nil` if the section is not present.
+     */
+    public func titleForHeader(section section: Int) -> String? {
         return self.fetchedResultsController.sections?[section].name
     }
 
-    internal func configureCell(cell: UIView, indexPath: NSIndexPath) {
+    func configure(cell cell: UIView, indexPath: NSIndexPath) {
         var item: NSManagedObject?
 
         let rowIsInsideBounds = indexPath.row < self.fetchedResultsController.fetchedObjects?.count

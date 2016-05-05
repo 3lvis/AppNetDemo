@@ -1,50 +1,37 @@
 import Foundation
 import DATAStack
+import NSManagedObject_HYPPropertyMapper
 
 public extension NSArray {
-    func preprocessForEntityNamed(entityName: String, predicate: NSPredicate, parent: NSManagedObject, dataStack: DATAStack) {
+  /**
+   Filters the items using the provided predicate, useful to exclude JSON objects from a JSON array by using a predicate.
+   - parameter entityName: The name of the entity to be synced.
+   - parameter predicate: The predicate used to filter out changes, if you want to exclude some items, you just need to provide this predicate.
+   - parameter parent: The parent of the entity, optional since many entities are orphans.
+   - parameter dataStack: The DATAStack instance.
+   */
+  func preprocessForEntityNamed(entityName: String, predicate: NSPredicate, parent: NSManagedObject?, dataStack: DATAStack) -> [[String : AnyObject]] {
+    var filteredChanges = [[String : AnyObject]]()
+    let validClasses = [NSDate.classForCoder(), NSNumber.classForCoder(), NSString.classForCoder()]
+    if let predicate = predicate as? NSComparisonPredicate, selfArray = self as? [[String : AnyObject]] where validClasses.contains({ $0 == predicate.rightExpression.classForCoder }) {
+        var objectChanges = [NSManagedObject]()
+        let context = dataStack.newDisposableMainContext()
+        if let entity = NSEntityDescription.entityForName(entityName, inManagedObjectContext: context) {
+          selfArray.forEach {
+            let object = NSManagedObject(entity: entity, insertIntoManagedObjectContext: context)
+            object.sync_fillWithDictionary($0, parent: parent, dataStack: dataStack)
+            objectChanges.append(object)
+          }
 
-    }
-}
-
-/*
-- (NSArray *)preprocessForEntityNamed:(NSString *)entityName
-usingPredicate:(NSPredicate *)predicate
-parent:(NSManagedObject *)parent
-dataStack:(DATAStack *)dataStack {
-    NSMutableArray *filteredChanges = [NSMutableArray new];
-
-    if ([predicate isKindOfClass:[NSComparisonPredicate class]]) {
-        NSComparisonPredicate *castedPredicate = (NSComparisonPredicate *)predicate;
-        NSExpression *rightExpression = castedPredicate.rightExpression;
-        id rightValue = [rightExpression constantValue];
-        BOOL rightValueCanBeCompared = (rightValue &&
-            ([rightValue isKindOfClass:[NSDate class]] ||
-                [rightValue isKindOfClass:[NSNumber class]] ||
-                [rightValue isKindOfClass:[NSString class]]));
-        if (rightValueCanBeCompared) {
-            NSMutableArray *objectChanges = [NSMutableArray new];
-            NSManagedObjectContext *context = [dataStack newDisposableMainContext];
-            NSEntityDescription *entity = [NSEntityDescription entityForName:entityName
-                inManagedObjectContext:context];
-            for (NSDictionary *change in self) {
-                NSManagedObject *object = [[NSManagedObject alloc] initWithEntity:entity insertIntoManagedObjectContext:context];
-                NSError *error = nil;
-                [object hyp_fillWithDictionary:change];
-                [object sync_processRelationshipsUsingDictionary:change
-                    andParent:parent
-                    dataStack:dataStack
-                    error:&error];
-                [objectChanges addObject:object];
+          guard let filteredArray = (objectChanges as NSArray).filteredArrayUsingPredicate(predicate) as? [NSManagedObject] else { fatalError("Couldn't cast filteredArray as [NSManagedObject]: \(objectChanges), predicate: \(predicate)") }
+          for filteredObject in filteredArray  {
+            if let change = filteredObject.hyp_dictionaryUsingRelationshipType(.Array) as? [String : AnyObject] {
+              filteredChanges.append(change)
             }
-
-            NSArray *filteredArray = [objectChanges filteredArrayUsingPredicate:predicate];
-            for (NSManagedObject *filteredObject in filteredArray) {
-                [filteredChanges addObject:[filteredObject hyp_dictionaryUsingRelationshipType:HYPPropertyMapperRelationshipTypeArray]];
-            }
+          }
         }
     }
 
-    return [filteredChanges copy];
+    return filteredChanges
+  }
 }
-*/

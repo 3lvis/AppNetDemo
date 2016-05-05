@@ -16,11 +16,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidEnterBackground(application: UIApplication) {
-        self.dataStack.persistWithCompletion(nil)
+        self.dataStack.persist(nil)
     }
 
     func applicationWillTerminate(application: UIApplication) {
-        self.dataStack.persistWithCompletion(nil)
+        self.dataStack.persist(nil)
     }
 }
 

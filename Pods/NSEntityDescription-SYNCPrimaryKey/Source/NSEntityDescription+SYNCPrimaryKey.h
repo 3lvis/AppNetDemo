@@ -1,17 +1,17 @@
 @import CoreData;
 
-static NSString * const SYNCDefaultLocalPrimaryKey = @"remoteID";
-static NSString * const SYNCDefaultRemotePrimaryKey = @"id";
+static NSString * _Nonnull const SYNCDefaultLocalPrimaryKey = @"remoteID";
+static NSString * _Nonnull const SYNCDefaultRemotePrimaryKey = @"id";
 
-static NSString * const SYNCCustomLocalPrimaryKey = @"hyper.isPrimaryKey";
-static NSString * const SYNCCustomRemoteKey = @"hyper.remoteKey";
+static NSString * _Nonnull const SYNCCustomLocalPrimaryKey = @"hyper.isPrimaryKey";
+static NSString * _Nonnull const SYNCCustomRemoteKey = @"hyper.remoteKey";
 
 @interface NSEntityDescription (SYNCPrimaryKey)
 
-- (NSAttributeDescription *)sync_primaryKeyAttribute;
+- (nonnull NSAttributeDescription *)sync_primaryKeyAttribute;
 
-- (NSString *)sync_localKey;
+- (nonnull NSString *)sync_localKey;
 
-- (NSString *)sync_remoteKey;
+- (nonnull NSString *)sync_remoteKey;
 
 @end

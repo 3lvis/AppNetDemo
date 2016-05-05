@@ -7,7 +7,7 @@ extension DATASource: NSFetchedResultsControllerDelegate {
             tableView.beginUpdates()
         } else if let _ = self.collectionView {
             self.sectionChanges = [NSFetchedResultsChangeType : NSMutableIndexSet]()
-            self.objectChanges = [NSFetchedResultsChangeType : [NSIndexPath]]()
+            self.objectChanges = [NSFetchedResultsChangeType : Set<NSIndexPath>]()
         }
     }
 
@@ -15,15 +15,16 @@ extension DATASource: NSFetchedResultsControllerDelegate {
         self.cachedSectionNames.removeAll()
 
         if let tableView = self.tableView {
+            let rowAnimationType = self.animations?[type] ?? .Automatic
             switch type {
             case .Insert:
-                tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
+                tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: rowAnimationType)
                 break
             case .Delete:
-                tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
+                tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: rowAnimationType)
                 break
             case .Move, .Update:
-                tableView.reloadSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
+                tableView.reloadSections(NSIndexSet(index: sectionIndex), withRowAnimation: rowAnimationType)
                 break
             }
         } else if let _ = self.collectionView {
@@ -44,16 +45,17 @@ extension DATASource: NSFetchedResultsControllerDelegate {
 
     public func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
         if let tableView = self.tableView {
+            let rowAnimationType = self.animations?[type] ?? .Automatic
             switch type {
             case .Insert:
                 if let newIndexPath = newIndexPath, anObject = anObject as? NSManagedObject {
-                    tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+                    tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: rowAnimationType)
                     self.delegate?.dataSource?(self, didInsertObject: anObject, atIndexPath: newIndexPath)
                 }
                 break
             case .Delete:
                 if let indexPath = indexPath, anObject = anObject as? NSManagedObject {
-                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: rowAnimationType)
                     self.delegate?.dataSource?(self, didDeleteObject: anObject, atIndexPath: indexPath)
                 }
                 break
@@ -61,7 +63,7 @@ extension DATASource: NSFetchedResultsControllerDelegate {
                 if let indexPath = indexPath {
                     if tableView.indexPathsForVisibleRows?.indexOf(indexPath) != nil {
                         if let cell = tableView.cellForRowAtIndexPath(indexPath) {
-                            self.configureCell(cell, indexPath: indexPath)
+                            self.configure(cell: cell, indexPath: indexPath)
                         }
 
                         if let anObject = anObject as? NSManagedObject {
@@ -72,33 +74,28 @@ extension DATASource: NSFetchedResultsControllerDelegate {
                 break
             case .Move:
                 if let indexPath = indexPath, newIndexPath = newIndexPath {
-                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
-                    tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: .Automatic)
+                    tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: rowAnimationType)
+                    tableView.insertRowsAtIndexPaths([newIndexPath], withRowAnimation: rowAnimationType)
 
-                    if let oldCell = tableView.cellForRowAtIndexPath(indexPath), newCell = tableView.cellForRowAtIndexPath(newIndexPath) {
-                        self.configureCell(oldCell, indexPath: indexPath)
-                        self.configureCell(newCell, indexPath: newIndexPath)
-
-                        if let anObject = anObject as? NSManagedObject {
-                            self.delegate?.dataSource?(self, didMoveObject: anObject, fromIndexPath: indexPath, toIndexPath: newIndexPath)
-                        }
+                    if let anObject = anObject as? NSManagedObject {
+                        self.delegate?.dataSource?(self, didMoveObject: anObject, fromIndexPath: indexPath, toIndexPath: newIndexPath)
                     }
                 }
                 break
             }
         } else if let _ = self.collectionView {
-            var changeSet = self.objectChanges[type] ?? [NSIndexPath]()
+            var changeSet = self.objectChanges[type] ?? Set<NSIndexPath>()
 
             switch type {
             case .Insert:
                 if let newIndexPath = newIndexPath {
-                    changeSet.append(newIndexPath)
+                    changeSet.insert(newIndexPath)
                     self.objectChanges[type] = changeSet
                 }
                 break
             case .Delete, .Update:
                 if let indexPath = indexPath {
-                    changeSet.append(indexPath)
+                    changeSet.insert(indexPath)
                     self.objectChanges[type] = changeSet
                 }
                 break
@@ -108,11 +105,11 @@ extension DATASource: NSFetchedResultsControllerDelegate {
                     // where both indexPaths are the same, as a workaround if this happens, DATASource
                     // will treat this change as an .Update
                     if indexPath == newIndexPath {
-                        changeSet.append(indexPath)
+                        changeSet.insert(indexPath)
                         self.objectChanges[.Update] = changeSet
                     } else {
-                        changeSet.append(indexPath)
-                        changeSet.append(newIndexPath)
+                        changeSet.insert(indexPath)
+                        changeSet.insert(newIndexPath)
                         self.objectChanges[type] = changeSet
                     }
                 }
@@ -127,15 +124,16 @@ extension DATASource: NSFetchedResultsControllerDelegate {
         } else if let _ = self.collectionView {
             if let moves = self.objectChanges[.Move] {
                 if moves.count > 0 {
-                    var updatedMoves = [NSIndexPath]()
+                    var updatedMoves = Set<NSIndexPath>()
                     if let insertSections = self.sectionChanges[.Insert], deleteSections = self.sectionChanges[.Delete] {
-                        let fromIndexPath = moves[0]
-                        let toIndexPath = moves[1]
+                        var generator = moves.generate()
+                        guard let fromIndexPath = generator.next() else { fatalError("fromIndexPath not found. Moves: \(moves), inserted sections: \(insertSections), deleted sections: \(deleteSections)") }
+                        guard let toIndexPath = generator.next() else { fatalError("toIndexPath not found. Moves: \(moves), inserted sections: \(insertSections), deleted sections: \(deleteSections)") }
 
                         if deleteSections.containsIndex(fromIndexPath.section) {
                             if insertSections.containsIndex(toIndexPath.section) == false {
                                 if var changeSet = self.objectChanges[.Insert] {
-                                    changeSet.append(toIndexPath)
+                                    changeSet.insert(toIndexPath)
                                     self.objectChanges[.Insert] = changeSet
                                 } else {
                                     self.objectChanges[.Insert] = [toIndexPath]
@@ -143,13 +141,15 @@ extension DATASource: NSFetchedResultsControllerDelegate {
                             }
                         } else if insertSections.containsIndex(toIndexPath.section) {
                             if var changeSet = self.objectChanges[.Delete] {
-                                changeSet.append(fromIndexPath)
+                                changeSet.insert(fromIndexPath)
                                 self.objectChanges[.Delete] = changeSet
                             } else {
                                 self.objectChanges[.Delete] = [fromIndexPath]
                             }
                         } else {
-                            updatedMoves.appendContentsOf(moves)
+                            for move in moves {
+                                updatedMoves.insert(move)
+                            }
                         }
                     }
 
@@ -172,19 +172,22 @@ extension DATASource: NSFetchedResultsControllerDelegate {
                     }
 
                     if let deleteItems = self.objectChanges[.Delete] {
-                        collectionView.deleteItemsAtIndexPaths(deleteItems)
+                        collectionView.deleteItemsAtIndexPaths(Array(deleteItems))
                     }
 
                     if let insertedItems = self.objectChanges[.Insert] {
-                        collectionView.insertItemsAtIndexPaths(insertedItems)
+                        collectionView.insertItemsAtIndexPaths(Array(insertedItems))
                     }
 
                     if let reloadItems = self.objectChanges[.Update] {
-                        collectionView.reloadItemsAtIndexPaths(reloadItems)
+                        collectionView.reloadItemsAtIndexPaths(Array(reloadItems))
                     }
 
                     if let moveItems = self.objectChanges[.Move] {
-                        collectionView.moveItemAtIndexPath(moveItems[0], toIndexPath: moveItems[1])
+                        var generator = moveItems.generate()
+                        guard let fromIndexPath = generator.next() else { fatalError("fromIndexPath not found. Move items: \(moveItems)") }
+                        guard let toIndexPath = generator.next() else { fatalError("toIndexPath not found. Move items: \(moveItems)") }
+                        collectionView.moveItemAtIndexPath(fromIndexPath, toIndexPath: toIndexPath)
                     }
 
                     }, completion: nil)

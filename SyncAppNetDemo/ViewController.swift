@@ -24,7 +24,7 @@ class ViewController: UITableViewController {
         self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: ViewController.CellIdentifier)
 
         self.refreshControl = UIRefreshControl()
-        self.refreshControl?.addTarget(self, action: "fetchNewData", forControlEvents: .ValueChanged)
+        self.refreshControl?.addTarget(self, action: #selector(ViewController.fetchNewData), forControlEvents: .ValueChanged)
 
         self.fetchCurrentObjects()
         self.fetchNewData()

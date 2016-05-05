@@ -31,7 +31,7 @@ class Networking: NSObject {
         let data = NSData(contentsOfFile: filePath)!
         let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as! [String: AnyObject]
         self.dataStack.performInNewBackgroundContext { backgroundContext in
-            NSNotificationCenter.defaultCenter().addObserver(self, selector: "changeNotification:", name: NSManagedObjectContextObjectsDidChangeNotification, object: backgroundContext)
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(Networking.changeNotification(_:)), name: NSManagedObjectContextObjectsDidChangeNotification, object: backgroundContext)
 
             Sync.changes(json["data"] as! Array, inEntityNamed: "Data", predicate: nil, parent: nil, inContext: backgroundContext, dataStack: self.dataStack, completion: { error in
                 NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextObjectsDidChangeNotification, object: nil)

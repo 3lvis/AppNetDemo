@@ -12,14 +12,14 @@
 
 #pragma mark - Private methods
 
-- (NSString *)hyp_remoteString
+- (nonnull NSString *)hyp_remoteString
 {
     NSString *processedString = [self hyp_replaceIdentifierWithString:@"_"];
 
     return [processedString hyp_lowerCaseFirstLetter];
 }
 
-- (NSString *)hyp_localString
+- (nonnull NSString *)hyp_localString
 {
     NSString *processedString = self;
 
@@ -46,7 +46,7 @@
     return found;
 }
 
-- (NSString *)hyp_lowerCaseFirstLetter
+- (nonnull NSString *)hyp_lowerCaseFirstLetter
 {
     NSMutableString *mutableString = [[NSMutableString alloc] initWithString:self];
     NSString *firstLetter = [[mutableString substringToIndex:1] lowercaseString];
@@ -56,7 +56,7 @@
     return [mutableString copy];
 }
 
-- (NSString *)hyp_replaceIdentifierWithString:(NSString *)replacementString
+- (nonnull NSString *)hyp_replaceIdentifierWithString:(NSString *)replacementString
 {
     NSScanner *scanner = [NSScanner scannerWithString:self];
     scanner.caseSensitive = YES;
@@ -64,7 +64,13 @@
     NSCharacterSet *identifierSet = [NSCharacterSet characterSetWithCharactersInString:@"_- "];
     NSCharacterSet *alphanumericSet = [NSCharacterSet alphanumericCharacterSet];
     NSCharacterSet *uppercaseSet = [NSCharacterSet uppercaseLetterCharacterSet];
-    NSCharacterSet *lowercaseSet = [NSCharacterSet lowercaseLetterCharacterSet];
+
+    NSCharacterSet *lowercaseLettersSet = [NSCharacterSet lowercaseLetterCharacterSet];
+    NSCharacterSet *decimalDigitSet = [NSCharacterSet decimalDigitCharacterSet];
+    NSMutableCharacterSet *mutableLowercaseSet = [[NSMutableCharacterSet alloc] init];
+    [mutableLowercaseSet formUnionWithCharacterSet:lowercaseLettersSet];
+    [mutableLowercaseSet formUnionWithCharacterSet:decimalDigitSet];
+    NSCharacterSet *lowercaseSet = [mutableLowercaseSet copy];
 
     NSString *buffer = nil;
     NSMutableString *output = [NSMutableString string];
@@ -75,9 +81,7 @@
 
         if ([replacementString length] > 0) {
             BOOL isUppercaseCharacter = [scanner scanCharactersFromSet:uppercaseSet intoString:&buffer];
-
             if (isUppercaseCharacter) {
-
                 for (NSString *string in [NSString acronyms]) {
                     BOOL containsString = ([[buffer lowercaseString] rangeOfString:string].location != NSNotFound);
                     if (containsString) {
@@ -89,7 +93,6 @@
                         break;
                     }
                 }
-
                 [output appendString:replacementString];
                 [output appendString:[buffer lowercaseString]];
             }
@@ -98,7 +101,6 @@
             if (isLowercaseCharacter) {
                 [output appendString:[buffer lowercaseString]];
             }
-
         } else if ([scanner scanCharactersFromSet:alphanumericSet intoString:&buffer]) {
             if ([[NSString acronyms] containsObject:buffer]) {
                 [output appendString:[buffer uppercaseString]];
@@ -114,7 +116,7 @@
     return output;
 }
 
-+ (NSArray *)acronyms
++ (nonnull NSArray *)acronyms
 {
     return @[@"id", @"pdf", @"url", @"png", @"jpg", @"uri", @"json", @"xml"];
 }

@@ -1,11 +1,12 @@
 ![Hyper Sync™](https://raw.githubusercontent.com/hyperoslo/Sync/master/Images/logo-v2.png)
 
-[![Version](https://img.shields.io/cocoapods/v/Sync.svg?style=flat)](http://cocoadocs.org/docsets/Sync)
-[![License](https://img.shields.io/cocoapods/l/Sync.svg?style=flat)](http://cocoadocs.org/docsets/Sync)
-[![Platform](https://img.shields.io/cocoapods/p/Sync.svg?style=flat)](http://cocoadocs.org/docsets/Sync)
+[![Version](https://img.shields.io/cocoapods/v/Sync.svg?style=flat)](https://cocoapods.org/pods/Sync)
+[![License](https://img.shields.io/cocoapods/l/Sync.svg?style=flat)](https://cocoapods.org/pods/Sync)
+[![Platform](https://img.shields.io/cocoapods/p/Sync.svg?style=flat)](https://cocoapods.org/pods/Sync)
 
 **Sync** eases your everyday job of parsing a `JSON` response and getting it into Core Data. It uses a convention-over-configuration paradigm to facilitate your workflow.
 
+* Automatic mapping of CamelCase or snake_case JSON into Core Data
 * Handles operations in safe background threads
 * Thread-safe saving, we handle retrieving and storing objects in the right threads
 * Diffing of changes, updated, inserted and deleted objects (which are automatically purged for you)
@@ -18,11 +19,9 @@
 * [Interface](#interface)
   * [Swift](#swift)
   * [Objective-C](#objective-c)
-* [Example](#example)
-  * [Model](#model)
-  * [JSON](#json)
-  * [Sync](#sync)
-  * [More examples](#more-examples)
+* [Example using snake_case in Swift](#example-with-snake_case-in-swift)
+* [Example using CamelCase in Objective-C](#example-with-camelcase-in-objective-c)
+* [More examples](#more-examples)
 * [Getting Started](#getting-started)
   * [Installation](#installation)
 * [Requisites](#requisites)
@@ -48,7 +47,7 @@
 
 ```swift
 Sync.changes(
-  changes: [AnyObject],
+  changes: [[String : AnyObject]],
   inEntityNamed: String,
   dataStack: DATAStack,
   completion: ((NSError?) -> Void)?)
@@ -67,8 +66,7 @@ Sync.changes(
 * `entityName`: Core Data’s Model Entity Name (such as User, Note, Task)
 * `dataStack`: Your [DATAStack](https://github.com/3lvis/DATAStack)
 
-
-## Example
+## Example with snake_case in Swift
 
 ### Model
 
@@ -90,6 +88,63 @@ Sync.changes(
         "text": "Shawn Merril's diary, episode 1",
         "created_at": "2014-03-11T19:11:00+00:00",
         "updated_at": "2014-04-18T22:01:00+00:00"
+      }
+    ]
+  }
+]
+```
+
+### Sync
+
+```swift
+Sync.changes(
+  changes: JSON,
+  inEntityNamed: "User",
+  dataStack: dataStack) { error in
+    // New objects have been inserted
+    // Existing objects have been updated
+    // And not found objects have been deleted
+}
+```
+
+Alternatively, if you only want to sync users that have been created in the last 24 hours, you could do this by using a `NSPredicate`.
+
+```swift
+let now = NSDate()
+let yesterday = now.dateByAddingTimeInterval(-24*60*60)
+let predicate = NSPredicate(format:@"createdAt > %@", yesterday)
+
+Sync.changes(
+  changes: JSON,
+  inEntityNamed: "User",
+  predicate: predicate
+  dataStack: dataStack) { error in
+    //..
+}
+```
+
+## Example with CamelCase in Objective-C
+
+### Model
+
+![Model](https://raw.githubusercontent.com/hyperoslo/Sync/master/Images/sync-model.png)
+
+### JSON
+
+```json
+[
+  {
+    "id": 6,
+    "name": "Shawn Merrill",
+    "email": "shawn@ovium.com",
+    "createdAt": "2014-02-14T04:30:10+00:00",
+    "updatedAt": "2014-02-17T10:01:12+00:00",
+    "notes": [
+      {
+        "id": 0,
+        "text": "Shawn Merril's diary, episode 1",
+        "createdAt": "2014-03-11T19:11:00+00:00",
+        "updatedAt": "2014-04-18T22:01:00+00:00"
       }
     ]
   }
@@ -125,13 +180,13 @@ inEntityNamed:@"User"
     }];
 ```
 
-### More Examples
+## More Examples
 
-<a href="https://github.com/hyperoslo/Sync/tree/master/AppNet/README.md">
+<a href="https://github.com/3lvis/SyncAppNetDemo">
   <img src="https://raw.githubusercontent.com/hyperoslo/Sync/master/Images/APPNET-v3.png" />
 </a>
 
-<a href="https://github.com/3lvis/SyncDesignerNewsDemo/README.md">
+<a href="https://github.com/3lvis/SyncDesignerNewsDemo">
   <img src="https://raw.githubusercontent.com/hyperoslo/Sync/master/Images/DN-v4.png" />
 </a>
 
@@ -154,14 +209,18 @@ pod 'Sync'
 
 Replace your Core Data stack with an instance of [DATAStack](https://github.com/3lvis/DATAStack).
 
-```objc
-self.dataStack = [[DATAStack alloc] initWithModelName:@"Demo"];
+```swift
+self.dataStack = DATAStack(modelName: "Demo")
 ```
 
 Then add this to your App Delegate so everything gets persisted when you quit the app.
-```objc
-- (void)applicationWillTerminate:(UIApplication *)application {
-    [self.dataStack persistWithCompletion:nil];
+```swift
+func applicationDidEnterBackground(application: UIApplication) {
+    self.dataStack.persistWithCompletion(nil)
+}
+
+func applicationWillTerminate(application: UIApplication) {
+    self.dataStack.persistWithCompletion(nil)
 }
 ```
 
@@ -196,7 +255,8 @@ To map **arrays** or **dictionaries** just set attributes as `Binary Data` on th
 
 ![screen shot 2015-04-02 at 11 10 11 pm](https://cloud.githubusercontent.com/assets/1088217/6973785/7d3767dc-d98d-11e4-8add-9c9421b5ed47.png)
 
-#### Retreiving mapped arrays
+#### Retrieving mapped arrays
+
 ```json
 {
   "hobbies": [
@@ -207,8 +267,8 @@ To map **arrays** or **dictionaries** just set attributes as `Binary Data` on th
 }
 ```
 
-```objc
-NSArray *hobbies = [NSKeyedUnarchiver unarchiveObjectWithData:managedObject.hobbies];
+```swift
+let hobbies = NSKeyedUnarchiver.unarchiveObjectWithData(managedObject.hobbies)
 // ==> "football", "soccer", "code"
 ```
 
@@ -222,29 +282,30 @@ NSArray *hobbies = [NSKeyedUnarchiver unarchiveObjectWithData:managedObject.hobb
 }
 ```
 
-```objc
-NSDictionary *expenses = [NSKeyedUnarchiver unarchiveObjectWithData:managedObject.expenses];
+```swift
+let expenses = NSKeyedUnarchiver.unarchiveObjectWithData(managedObject.expenses)
 // ==> "cake" : 12.50, "juice" : 0.50
 ```
+
 #### Dates
 
 We went for supporting [ISO8601](http://en.wikipedia.org/wiki/ISO_8601) and unix timestamp out of the box because those are the most common formats when parsing dates, also we have a [quite performant way to parse this strings](https://github.com/hyperoslo/NSManagedObject-HYPPropertyMapper/blob/master/Source/NSManagedObject%2BHYPPropertyMapper.m#L272-L319) which overcomes the [performance issues of using `NSDateFormatter`](http://blog.soff.es/how-to-drastically-improve-your-app-with-an-afternoon-and-instruments/).
 
-```objc
-NSDictionary *values = @{@"created_at" : @"2014-01-01T00:00:00+00:00",
-                         @"updated_at" : @"2014-01-02",
-                         @"published_at": @"1441843200"
-                         @"number_of_attendes": @20};
+```swift
+let values = ["created_at" : "2014-01-01T00:00:00+00:00",
+              "updated_at" : "2014-01-02",
+              "published_at": "1441843200"
+              "number_of_attendes": 20]
 
-[managedObject hyp_fillWithDictionary:values];
+managedObject.hyp_fillWithDictionary(values)
 
-NSDate *createdAt = [managedObject valueForKey:@"createdAt"];
+let createdAt = managedObject.valueForKey("createdAt")
 // ==> "2014-01-01 00:00:00 +00:00"
 
-NSDate *updatedAt = [managedObject valueForKey:@"updatedAt"];
+let updatedAt = managedObject.valueForKey("updatedAt")
 // ==> "2014-01-02 00:00:00 +00:00"
 
-NSDate *publishedAt = [managedObject valueForKey:@"publishedAt"];
+let publishedAt = managedObject.valueForKey("publishedAt")
 // ==> "2015-09-10 00:00:00 +00:00"
 ```
 
@@ -264,7 +325,7 @@ Lets consider the following Core Data model.
 
 This model has a one-to-many relationship between `User` and `Note`, so in other words a user has many notes. Here can also find an inverse relationship to user on the Note model. This is required for Sync to have more context on how your models are presented. Finally, in the Core Data model there is a cascade relationship between user and note, so when a user is deleted all the notes linked to that user are also removed (you can specify any delete rule).
 
-So when Sync, looks into the following JSON, it will sync all the notes for that specific user, doing the necesary inverse relationship dance.
+So when Sync, looks into the following JSON, it will sync all the notes for that specific user, doing the necessary inverse relationship dance.
 
 ```json
 [
@@ -341,11 +402,11 @@ You are free to use any networking library.
 
 ## FAQ
 
-#### Using `hyper.primaryKey` in addition to `hyper.remoteKey`:
+#### Using `hyper.isPrimaryKey` in addition to `hyper.remoteKey`:
 
-Well, the thing is that if you add `hyper.primaryKey` it would uses the normal attribute for the local primary key, but the remote primary key is the snake_case representation of it. Some people might expect that the local keeps been the same (remoteID), or that the remote keeps been the same (id).
+Well, the thing is that if you add `hyper.isPrimaryKey` it would use the normal attribute for the local primary key, but the remote primary key is the snake_case representation of it. Some people might expect that the local keeps been the same (remoteID), or that the remote keeps been the same (id).
 
-For example if you add the flag `hyper.PrimaryKey` to the attribute `article_body` then:
+For example if you add the flag `hyper.isPrimaryKey` to the attribute `article_body` then:
 
 - Remote primary key: `article_body`
 - Local primary key: `articleBody`
@@ -434,12 +495,12 @@ If you're using Swift to be able to use `NSNotificationCenter` your class should
 
 This means that the local primary key was not found, Sync uses `remoteID` by default, but if you have another local primary key make sure to mark it with `"hyper.isPrimaryKey" : "YES"` in your attribute's user info. For more information check the [Primary Key](https://github.com/hyperoslo/Sync#primary-key) section.
 
-```objc
-NSString *localKey = [entity sync_localKey];
-NSParameterAssert(localKey);
+```swift
+let localKey = entity.sync_localKey()
+assert(localKey != nil, "nil value")
 
-NSString *remoteKey = [entity sync_remoteKey];
-NSParameterAssert(remoteKey);
+let remoteKey = entity.sync_remoteKey()
+assert(remoteKey != nil, "nil value")
 ```
 
 ## Credits

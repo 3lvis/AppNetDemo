@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '727929A8A26821BE951239C0'
+               BlueprintIdentifier = 'DD418D6F082F070ECB126D1D'
                BlueprintName = 'NSJSONSerialization-ANDYJSONFile'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'NSJSONSerialization_ANDYJSONFile.framework'>

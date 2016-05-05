@@ -1,25 +1,23 @@
 PODS:
-  - Alamofire (3.1.5)
+  - Alamofire (3.3.1)
   - DATAFilter (0.9.1):
     - DATAObjectIDs (~> 0.5.1)
   - DATAObjectIDs (0.5.1)
-  - DATASource (5.6.0)
-  - DATAStack (4.0.3):
-    - TestCheck (~> 0.3.0)
+  - DATASource (5.8.0)
+  - DATAStack (4.3.0)
   - NSDictionary-ANDYSafeValue (0.3.1)
-  - NSEntityDescription-SYNCPrimaryKey (0.1.1):
-    - NSString-HYPNetworking (~> 0.3.3)
+  - NSEntityDescription-SYNCPrimaryKey (0.1.2):
+    - NSString-HYPNetworking (~> 0.4.0)
   - NSJSONSerialization-ANDYJSONFile (1.1)
-  - NSManagedObject-HYPPropertyMapper (3.4.0):
-    - NSString-HYPNetworking (~> 0.3.3)
-  - NSString-HYPNetworking (0.3.3)
-  - Sync (1.4.0):
+  - NSManagedObject-HYPPropertyMapper (3.6.0):
+    - NSString-HYPNetworking (~> 0.4.0)
+  - NSString-HYPNetworking (0.4.0)
+  - Sync (1.6.5):
     - DATAFilter (~> 0.9.1)
-    - DATAStack (~> 4.0.3)
+    - DATAStack (~> 4.3.0)
     - NSDictionary-ANDYSafeValue (~> 0.3.1)
-    - NSEntityDescription-SYNCPrimaryKey (~> 0.1.1)
-    - NSManagedObject-HYPPropertyMapper (~> 3.4.0)
-  - TestCheck (0.3.0)
+    - NSEntityDescription-SYNCPrimaryKey (~> 0.1.2)
+    - NSManagedObject-HYPPropertyMapper (~> 3.6.0)
 
 DEPENDENCIES:
   - Alamofire (~> 3.0)
@@ -28,17 +26,16 @@ DEPENDENCIES:
   - Sync
 
 SPEC CHECKSUMS:
-  Alamofire: 5f730ba29fd113b7ddd71c1e65d0c630acf5d7b0
+  Alamofire: 369bc67b6f5ac33ded3648d7bd21c5bfb91c2ecc
   DATAFilter: 4a1bdc065847e19d9fa1c9dd92ed2d85847967a1
   DATAObjectIDs: 33db74dd1c858c2d22a45a4013c95f1082182e4e
-  DATASource: f189ace5ed4859501c9c48599625a1fe664d900f
-  DATAStack: 8622b05a7cc1dade21e105d20fdd9f8fbe63944d
+  DATASource: d5ecdfa4be7d73d41f58746d3346e5238766c86d
+  DATAStack: 9aeb2ed96ee3fa0e1234cdd174d95b4b9779b68e
   NSDictionary-ANDYSafeValue: 2d7adf339b6e302d71fec5f1d71ae00aacda993e
-  NSEntityDescription-SYNCPrimaryKey: 843225bf3bd09a1d7f9d4157111204bb3fe3cb18
+  NSEntityDescription-SYNCPrimaryKey: 9a2b2f7b838913eb445f20cc2f2edca7281fcfa5
   NSJSONSerialization-ANDYJSONFile: 4a92ca174d5ccde13015e853e9eb62440459b478
-  NSManagedObject-HYPPropertyMapper: adc718f9979cb57193e2c8882a4423df98970aae
-  NSString-HYPNetworking: 3b07da48f9f65a33d26e0467da8155bbb18d52bd
-  Sync: 5170d234814217a272118b971c172a596d76762c
-  TestCheck: 42c1343664986c0cbfaa20a62622d6f6fb70a407
+  NSManagedObject-HYPPropertyMapper: dbcaa74a43b522d45dacf1ad1c56b41ef008a0c0
+  NSString-HYPNetworking: 24c3828eebde8a37cc16101a475934a56ac820c0
+  Sync: b2f1c213d5019f4dd019a9bba6be418606602a60
 
 COCOAPODS: 0.39.0

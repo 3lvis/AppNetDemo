@@ -95,7 +95,6 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "Pods/NSManagedObject_HYPPropertyMapper.framework"
   install_framework "Pods/NSString_HYPNetworking.framework"
   install_framework "Pods/Sync.framework"
-  install_framework "Pods/TestCheck.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "Pods/Alamofire.framework"
@@ -109,5 +108,4 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "Pods/NSManagedObject_HYPPropertyMapper.framework"
   install_framework "Pods/NSString_HYPNetworking.framework"
   install_framework "Pods/Sync.framework"
-  install_framework "Pods/TestCheck.framework"
 fi

@@ -3,12 +3,10 @@ PODS:
   - DATAFilter (0.9.1):
     - DATAObjectIDs (~> 0.5.1)
   - DATAObjectIDs (0.5.1)
-  - DATASource (5.8.0)
   - DATAStack (5.0.0)
   - NSDictionary-ANDYSafeValue (0.3.1)
   - NSEntityDescription-SYNCPrimaryKey (1.0.0):
     - NSString-HYPNetworking (~> 0.4.0)
-  - NSJSONSerialization-ANDYJSONFile (1.1)
   - NSManagedObject-HYPPropertyMapper (3.6.3):
     - NSEntityDescription-SYNCPrimaryKey (~> 1.0.0)
     - NSString-HYPNetworking (~> 0.4.0)
@@ -22,8 +20,6 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 3.0)
-  - DATASource
-  - NSJSONSerialization-ANDYJSONFile
   - Sync (from `git@github.com:hyperoslo/Sync.git`)
 
 EXTERNAL SOURCES:
@@ -39,15 +35,13 @@ SPEC CHECKSUMS:
   Alamofire: c19a627cefd6a95f840401c49ab1f124e07f54ee
   DATAFilter: 4a1bdc065847e19d9fa1c9dd92ed2d85847967a1
   DATAObjectIDs: 33db74dd1c858c2d22a45a4013c95f1082182e4e
-  DATASource: d5ecdfa4be7d73d41f58746d3346e5238766c86d
   DATAStack: e0111e1db6044c8b355e68311e002cbec8963b28
   NSDictionary-ANDYSafeValue: 2d7adf339b6e302d71fec5f1d71ae00aacda993e
   NSEntityDescription-SYNCPrimaryKey: 3c6c6a49964a6a2e11e42709bd92e2f02b19fe79
-  NSJSONSerialization-ANDYJSONFile: 4a92ca174d5ccde13015e853e9eb62440459b478
   NSManagedObject-HYPPropertyMapper: 963c7f060cede6eca56a47581b32eceb7af8a507
   NSString-HYPNetworking: 24c3828eebde8a37cc16101a475934a56ac820c0
   Sync: 8cf6e0c97f2061cf6c015473032c1ea883c9d6a9
 
-PODFILE CHECKSUM: f3cd0cdcbd7ae8c95f288e820d5c2e55308cee04
+PODFILE CHECKSUM: 5677521be376cb91cff256f3769a3562ee437c15
 
 COCOAPODS: 1.0.0

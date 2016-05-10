@@ -31,3 +31,4 @@ DerivedData
 
 # CocoaPods
 Pods
+*.xcuserstate

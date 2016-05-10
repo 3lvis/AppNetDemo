@@ -14,13 +14,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         return true
     }
-
-    func applicationDidEnterBackground(application: UIApplication) {
-        self.dataStack.persist(nil)
-    }
-
-    func applicationWillTerminate(application: UIApplication) {
-        self.dataStack.persist(nil)
-    }
 }
 

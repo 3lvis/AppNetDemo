@@ -1,6 +1,0 @@
-framework module NSJSONSerialization_ANDYJSONFile {
-  umbrella header "NSJSONSerialization-ANDYJSONFile-umbrella.h"
-
-  export *
-  module * { export * }
-}

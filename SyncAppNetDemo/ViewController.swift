@@ -54,7 +54,7 @@ extension ViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ViewController.CellIdentifier)
-        let data = self.items[(indexPath as NSIndexPath).row]
+        let data = self.items[indexPath.row]
         cell?.textLabel?.text = data.text
         cell?.detailTextLabel?.text = data.user.username
 

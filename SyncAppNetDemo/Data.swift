@@ -5,7 +5,7 @@ import CoreData
 class Data: NSManagedObject {
     @NSManaged var text: String
     @NSManaged var id: String
-    @NSManaged var createdAt: NSTimeInterval
+    @NSManaged var createdAt: TimeInterval
     @NSManaged var user: User
     
 }

@@ -1,25 +1,13 @@
 PODS:
-  - Alamofire (3.4.0)
-  - DATAFilter (0.10.0):
-    - DATAObjectIDs (~> 0.5.1)
-  - DATAObjectIDs (0.5.1)
-  - DATAStack (5.2.0)
-  - NSDictionary-ANDYSafeValue (0.3.1)
-  - NSEntityDescription-SYNCPrimaryKey (1.1.1):
-    - NSString-HYPNetworking (~> 1.0.0)
-  - NSManagedObject-HYPPropertyMapper (3.6.5):
-    - NSEntityDescription-SYNCPrimaryKey (~> 1.1.1)
-    - NSString-HYPNetworking (~> 1.0.0)
-  - NSString-HYPNetworking (1.0.0)
-  - Sync (1.7.1):
-    - DATAFilter (~> 0.10.0)
-    - DATAStack (~> 5.2.0)
-    - NSDictionary-ANDYSafeValue (~> 0.3.1)
-    - NSEntityDescription-SYNCPrimaryKey (~> 1.1.1)
-    - NSManagedObject-HYPPropertyMapper (~> 3.6.5)
+  - Alamofire (4.0.1)
+  - DATAStack (6.1.0)
+  - Sync (2.3.1):
+    - DATAStack (~> 6.1.0)
+    - SYNCPropertyMapper (~> 5.0.1)
+  - SYNCPropertyMapper (5.0.1)
 
 DEPENDENCIES:
-  - Alamofire (~> 3.0)
+  - Alamofire (~> 4.0)
   - Sync (from `git@github.com:hyperoslo/Sync.git`)
 
 EXTERNAL SOURCES:
@@ -28,20 +16,15 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Sync:
-    :commit: 82725b9b7c4f03167a99f0e7b10a63e7808db709
+    :commit: 75cf2d13ebae6f669287bbd4a76c7faea5734485
     :git: git@github.com:hyperoslo/Sync.git
 
 SPEC CHECKSUMS:
-  Alamofire: c19a627cefd6a95f840401c49ab1f124e07f54ee
-  DATAFilter: b6662b05dd0dcf658d526aa0f9095bb202d7b10e
-  DATAObjectIDs: 33db74dd1c858c2d22a45a4013c95f1082182e4e
-  DATAStack: 191884208ad864299d079c4350f78696ad4c9e6b
-  NSDictionary-ANDYSafeValue: 2d7adf339b6e302d71fec5f1d71ae00aacda993e
-  NSEntityDescription-SYNCPrimaryKey: 50badad9cf3b44c538e137e363f3204725c8589c
-  NSManagedObject-HYPPropertyMapper: c496d7a45b95fa59871711bfd3fbe52546529b37
-  NSString-HYPNetworking: 9794295fb2f632ecf33cde6e6311e77588e6f349
-  Sync: ca4c0612349734efde11f77b90716f6c45be45b8
+  Alamofire: 7682d43245de14874acd142ec137b144aa1dd335
+  DATAStack: 753e2b009ddb8918c6329919f09c1f9d2bcd7cc2
+  Sync: 6926aaf4fda1ae751591a54cff3c2d778bd821bc
+  SYNCPropertyMapper: 316eeeeaad170a7407a82b15989852fcbf1f6573
 
-PODFILE CHECKSUM: 5677521be376cb91cff256f3769a3562ee437c15
+PODFILE CHECKSUM: cd1b6cc4c1fe833ca338e848a089da600db1831b
 
-COCOAPODS: 1.0.0
+COCOAPODS: 1.1.1

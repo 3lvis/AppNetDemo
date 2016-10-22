@@ -21,10 +21,10 @@ class ViewController: UITableViewController {
         super.viewDidLoad()
 
         self.title = "AppNet"
-        self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: ViewController.CellIdentifier)
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: ViewController.CellIdentifier)
 
         self.refreshControl = UIRefreshControl()
-        self.refreshControl?.addTarget(self, action: #selector(ViewController.fetchNewData), forControlEvents: .ValueChanged)
+        self.refreshControl?.addTarget(self, action: #selector(ViewController.fetchNewData), for: .valueChanged)
 
         self.fetchCurrentObjects()
         self.fetchNewData()
@@ -39,22 +39,22 @@ class ViewController: UITableViewController {
     }
 
     func fetchCurrentObjects() {
-        let request = NSFetchRequest(entityName: "Data")
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Data")
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
-        self.items = (try! dataStack.mainContext.executeFetchRequest(request)) as! [Data]
+        self.items = (try! dataStack.mainContext.fetch(request)) as! [Data]
         self.tableView.reloadData()
     }
 }
 
 // MARK: UITableViewDataSource
 extension ViewController {
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.items.count
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(ViewController.CellIdentifier)
-        let data = self.items[indexPath.row]
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: ViewController.CellIdentifier)
+        let data = self.items[(indexPath as NSIndexPath).row]
         cell?.textLabel?.text = data.text
         cell?.detailTextLabel?.text = data.user.username
 

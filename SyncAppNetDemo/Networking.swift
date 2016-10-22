@@ -11,12 +11,13 @@ class Networking: NSObject {
         self.dataStack = dataStack
     }
 
-    func fetchItems(completion: (NSError?) -> Void) {
-        Alamofire.request(.GET, AppNetURL).responseJSON { response in
-            let data = response.result.value as! [String : AnyObject]
-            Sync.changes(data["data"] as! [[String : AnyObject]], inEntityNamed: "Data", dataStack: self.dataStack, completion: { error in
+    func fetchItems(_ completion: @escaping (NSError?) -> Void) {
+        Alamofire.request(AppNetURL).responseJSON { response in
+            let data = response.result.value as! [String : Any]
+
+            Sync.changes(data["data"] as! [[String : Any]], inEntityNamed: "Data", dataStack: self.dataStack) { error in
                 completion(error)
-            })
+            }
         }
     }
 
@@ -25,22 +26,22 @@ class Networking: NSObject {
     but it can easily work with your own JSON too. Please use notifications to react to changes, not to modify the returned elements
     since that would be unsafe.
     */
-    func fetchLocalItems(completion: (NSError?) -> Void) {
-        let url = NSURL(string: "global.json")!
-        let filePath = NSBundle.mainBundle().pathForResource(url.URLByDeletingPathExtension?.absoluteString, ofType: url.pathExtension)!
-        let data = NSData(contentsOfFile: filePath)!
-        let json = try! NSJSONSerialization.JSONObjectWithData(data, options: []) as! [String: AnyObject]
+    func fetchLocalItems(_ completion: @escaping (NSError?) -> Void) {
+        let url = URL(string: "global.json")!
+        let filePath = Bundle.main.path(forResource: url.deletingPathExtension().absoluteString, ofType: url.pathExtension)!
+        let data = try! Foundation.Data(contentsOf: URL(fileURLWithPath: filePath))
+        let json = try! JSONSerialization.jsonObject(with: data, options: []) as! [String: AnyObject]
         self.dataStack.performInNewBackgroundContext { backgroundContext in
-            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(Networking.changeNotification(_:)), name: NSManagedObjectContextObjectsDidChangeNotification, object: backgroundContext)
+            NotificationCenter.default.addObserver(self, selector: #selector(Networking.changeNotification(_:)), name: .NSManagedObjectContextObjectsDidChange, object: backgroundContext)
 
             Sync.changes(json["data"] as! Array, inEntityNamed: "Data", predicate: nil, parent: nil, inContext: backgroundContext, dataStack: self.dataStack, completion: { error in
-                NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextObjectsDidChangeNotification, object: nil)
+                NotificationCenter.default.removeObserver(self, name: .NSManagedObjectContextObjectsDidChange, object: nil)
                 completion(error)
             })
         }
     }
 
-    func changeNotification(notification: NSNotification) {
+    func changeNotification(_ notification: Notification) {
         let updatedObjects = notification.userInfo?[NSUpdatedObjectsKey]
         let deletedObjects = notification.userInfo?[NSDeletedObjectsKey]
         let insertedObjects = notification.userInfo?[NSInsertedObjectsKey]

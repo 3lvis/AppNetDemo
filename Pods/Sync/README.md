@@ -1,28 +1,42 @@
 ![Sync](https://raw.githubusercontent.com/SyncDB/Sync/master/Images/logo-v3.png)
 
 <div align = "center">
+  <a href="https://cocoapods.org/pods/Sync">
+    <img src="https://img.shields.io/cocoapods/v/Sync.svg?style=flat" />
+  </a>
+  <a href="https://github.com/SyncDB/Sync">
+    <img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" />
+  </a>
   <a href="https://github.com/SyncDB/Sync#installation">
     <img src="https://img.shields.io/badge/compatible-swift%202.3%20and%203.0-orange.svg" />
   </a>
+</div>
+
+<div align = "center">
   <a href="https://cocoapods.org/pods/Sync" target="blank">
     <img src="https://img.shields.io/cocoapods/p/Sync.svg?style=flat" />
   </a>
   <a href="https://cocoapods.org/pods/Sync" target="blank">
     <img src="https://img.shields.io/cocoapods/l/Sync.svg?style=flat" />
   </a>
+  <a href="https://gitter.im/SyncDB/Sync">
+    <img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg" />
+  </a>
   <br>
   <br>
 </div>
 
-**Sync** eases your everyday job of parsing a `JSON` response and getting it into Core Data. It uses a convention-over-configuration paradigm to facilitate your workflow.
+**Sync** eases your everyday job of parsing a JSON response and getting it into Core Data. It uses a convention-over-configuration paradigm to facilitate your workflow.
+
+Syncing JSON to Core Data is a repetitive tasks that often demands adding a lot of boilerplate code. Mapping attributes, mapping relationships, diffing for inserts, removals and updates are often tasks that don't change between apps. Taking this in account we took the challenge to abstract this into a library. **Sync** uses the knowledge of your Core Data model to infer all the mapping between your JSON and Core Data, once you use it, it feels so obvious that you'll wonder why you weren't doing this before.
 
 * Automatic mapping of camelCase or snake_case JSON into Core Data
 * Handles operations in safe background threads
 * Thread-safe saving, we handle retrieving and storing objects in the right threads
 * Diffing of changes, updated, inserted and deleted objects (which are automatically purged for you)
 * Auto-mapping of relationships (one-to-one, one-to-many and many-to-many)
-* Smart-updates, only updates your `NSManagedObject`s if the server values are different (useful when using `NSFetchedResultsController` delegates)
-* Uniquing, Core Data does this based on `objectID`s, we use your primary key (such as `id`) for this
+* Smart-updates, only updates your `NSManagedObject`s if the server values are different from your local ones
+* Uniquing, one Core Data entry per primary key
 * `NSOperation` subclass, any Sync process can be queued and cancelled at any time!
 
 ## Table of Contents
@@ -146,6 +160,12 @@ pod 'Sync', '~> 1'
 pod 'Sync', '~> 2'
 ```
 
+**Sync** is also available through [Carthage](https://github.com/Carthage/Carthage). To install
+it, simply add the following line to your Cartfile:
+
+```ruby
+github "SyncDB/Sync" ~> 2.0
+```
 
 ## Requisites
 

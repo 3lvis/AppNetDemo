@@ -2,7 +2,7 @@ import Foundation
 import DATAStack
 import SYNCPropertyMapper
 
-public extension NSArray {
+extension NSArray {
     /**
      Filters the items using the provided predicate, useful to exclude JSON objects from a JSON array by using a predicate.
      - parameter entityName: The name of the entity to be synced.
@@ -10,7 +10,8 @@ public extension NSArray {
      - parameter parent: The parent of the entity, optional since many entities are orphans.
      - parameter dataStack: The DATAStack instance.
      */
-    func preprocessForEntityNamed(_ entityName: String, predicate: NSPredicate, parent: NSManagedObject?, dataStack: DATAStack, operations: DATAFilter.Operation) -> [[String : Any]] {
+    /*
+    func preprocessForEntityNamed(_ entityName: String, predicate: NSPredicate, parent: NSManagedObject?, dataStack: DATAStack, operations: Sync.OperationOptions) -> [[String : Any]] {
         var filteredChanges = [[String : Any]]()
         let validClasses = [NSDate.classForCoder(), NSNumber.classForCoder(), NSString.classForCoder()]
         if let predicate = predicate as? NSComparisonPredicate, let selfArray = self as? [[String : Any]] , validClasses.contains(where: { $0 == predicate.rightExpression.classForCoder }) {
@@ -33,4 +34,5 @@ public extension NSArray {
         
         return filteredChanges
     }
+     */
 }

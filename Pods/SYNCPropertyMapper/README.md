@@ -1,4 +1,30 @@
-![Sync](https://raw.githubusercontent.com/SyncDB/SYNCPropertyMapper/master/GitHub/logo-v2.png)
+![SYNCPropertyMapper](https://raw.githubusercontent.com/SyncDB/SYNCPropertyMapper/master/GitHub/logo-v2.png)
+
+<div align = "center">
+  <a href="https://cocoapods.org/pods/SYNCPropertyMapper">
+    <img src="https://img.shields.io/cocoapods/v/SYNCPropertyMapper.svg?style=flat" />
+  </a>
+  <a href="https://github.com/SyncDB/SYNCPropertyMapper">
+    <img src="https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat" />
+  </a>
+  <a href="https://github.com/SyncDB/SYNCPropertyMapper#installation">
+    <img src="https://img.shields.io/badge/compatible-swift%202.3%20and%203.0-orange.svg" />
+  </a>
+</div>
+
+<div align = "center">
+  <a href="https://cocoapods.org/pods/SYNCPropertyMapper" target="blank">
+    <img src="https://img.shields.io/cocoapods/p/SYNCPropertyMapper.svg?style=flat" />
+  </a>
+  <a href="https://cocoapods.org/pods/SYNCPropertyMapper" target="blank">
+    <img src="https://img.shields.io/cocoapods/l/SYNCPropertyMapper.svg?style=flat" />
+  </a>
+  <a href="https://gitter.im/SyncDB/SYNCPropertyMapper">
+    <img src="https://img.shields.io/gitter/room/nwjs/nw.js.svg" />
+  </a>
+  <br>
+  <br>
+</div>
 
 **SYNCPropertyMapper** leverages on your Core Data model to infer how to map your JSON values into Core Data. It's simple and it's obvious. Why the hell isn't everybody doing this?
 
@@ -7,14 +33,15 @@
 * [Filling a NSManagedObject with JSON](#filling-a-nsmanagedobject-with-json)
   * [JSON in CamelCase](#json-in-camelcase)
   * [JSON in snake_case](#json-in-snake_case)
+  * [Attribute Types](#attribute-types)
+    * [String and numbers](#string-and-numbers)
+    * [Date](#date)
+    * [Array](#array)
+    * [Dictionary](#dictionary)  
   * [Exceptions](#exceptions)
   * [Custom](#custom)
   * [Deep mapping](#deep-mapping)
-  * [Attribute Types](#attribute-types)
-    * [Date](#date)
-    * [Array](#array)
-    * [Dictionary](#dictionary)
-  * [Value Transformations](#value-transformations)
+  * [Dealing with bad APIs](#dealing-with-bad-apis)
 * [JSON representation from a NSManagedObject](#json-representation-from-a-nsmanagedobject)
   * [Excluding](#excluding)
   * [Relationships](#relationships)
@@ -41,6 +68,11 @@ NSDictionary *values = [JSON valueForKey:@"user"];
 [user hyp_fillWithDictionary:values];
 ```
 
+```swift
+let userJSON = JSON["user"]
+user.hyp_fill(with: userJSON)
+```
+
 Your Core Data entities should match your backend models. Your attributes should match their JSON counterparts. For example `firstName` maps to `firstName`, `address` to `address`.
 
 ## JSON in snake_case
@@ -57,44 +89,18 @@ NSDictionary *values = [JSON valueForKey:@"user"];
 [user hyp_fillWithDictionary:values];
 ```
 
+```swift
+let userJSON = JSON["user"]
+user.hyp_fill(with: userJSON)
+```
+
 Your Core Data entities should match your backend models but in `camelCase`. Your attributes should match their JSON counterparts. For example `first_name` maps to `firstName`, `address` to `address`.
-
-## Exceptions
-
-There are two exceptions to this rules:
-
-* `id`s should match `remoteID`
-* Reserved attributes should be prefixed with the `entityName` (`type` becomes `userType`, `description` becomes `userDescription` and so on). In the JSON they don't need to change, you can keep `type` and `description` for example. A full list of reserved attributes can be found [here](https://github.com/SyncDB/SYNCPropertyMapper/blob/master/Sources/NSManagedObject%2BSYNCPropertyMapper/NSManagedObject%2BSYNCPropertyMapperHelpers.m#L240).
-
-## Custom
-
-![Remote mapping documentation](https://raw.githubusercontent.com/SyncDB/SYNCPropertyMapper/master/Resources/userInfo_documentation.png)
-
-* If you want to map your Core Data identifier (key) attribute with a JSON attribute that has different naming, you can do by adding `hyper.remoteKey` in the user info box with the value you want to map.
-
-## Deep mapping
-
-```json
-{
-  "id": 1,
-  "name": "John Monad",
-  "company": {
-    "name": "IKEA"
-  }
-}
-```
-
-In this example, if you want to avoid creating a Core Data entity for the company, you could map straight to the company's name. By adding this to the *User Info* of your `companyName` field:
-
-```
-hyper.remoteKey = company.name
-```
 
 ## Attribute Types
 
-For mapping for arrays and dictionaries just set attributes as `Binary Data` on the Core Data modeler
+### String and Numbers
 
-![screen shot 2015-04-02 at 11 10 11 pm](https://cloud.githubusercontent.com/assets/1088217/6973785/7d3767dc-d98d-11e4-8add-9c9421b5ed47.png)
+This is pretty straightforward and should work as you would expect it. A JSON string maps to NSString and double, float, ints and so on, map to NSNumber.
 
 ### Date
 
@@ -120,106 +126,134 @@ NSDate *publishedAt = [managedObject valueForKey:@"publishedAt"];
 
 If your date is not [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601) compliant, you can use a transformer attribute to parse your date, too. First set your attribute to `Transformable`, and set the name of your transformer like, in this example is `DateStringTransformer`:
 
-![transformable-attribute](https://raw.githubusercontent.com/SyncDB/SYNCPropertyMapper/master/Resources/date-transformable.png)
+![transformable-attribute](https://raw.githubusercontent.com/SyncDB/SYNCPropertyMapper/master/GitHub/date-transformable.png)
 
 You can find an example of date transformer in [DateStringTransformer](https://github.com/SyncDB/SYNCPropertyMapper/blob/master/Tests/NSManagedObject%2BSYNCPropertyMapper/Transformers/DateStringTransformer.m).
 
 ### Array
+
+For mapping for arrays first set attributes as `Binary Data` on the Core Data modeler.
+
+![screen shot 2015-04-02 at 11 10 11 pm](https://cloud.githubusercontent.com/assets/1088217/6973785/7d3767dc-d98d-11e4-8add-9c9421b5ed47.png)
+
 ```objc
-NSDictionary *values = @{@"hobbies" : @[@"football",
-                                        @"soccer",
-                                        @"code"]};
-
-[managedObject hyp_fillWithDictionary:values];
-
-NSArray *hobbies = [NSKeyedUnarchiver unarchiveObjectWithData:managedObject.hobbies];
+let values = ["hobbies" : ["football", "soccer", "code"]]
+managedObject.hyp_fill(with: values)
+let hobbies = NSKeyedUnarchiver.unarchiveObject(with: managedObject.hobbies) as! [String]
 // ==> "football", "soccer", "code"
 ```
 
 ### Dictionary
+
+For mapping for dictionaries first set attributes as `Binary Data` on the Core Data modeler.
+
+![screen shot 2015-04-02 at 11 10 11 pm](https://cloud.githubusercontent.com/assets/1088217/6973785/7d3767dc-d98d-11e4-8add-9c9421b5ed47.png)
+
 ```objc
-NSDictionary *values = @{@"expenses" : @{@"cake" : @12.50,
-                                         @"juice" : @0.50}};
-
-[managedObject hyp_fillWithDictionary:values];
-
-NSDictionary *expenses = [NSKeyedUnarchiver unarchiveObjectWithData:managedObject.expenses];
+let values = ["expenses" : ["cake" : 12.50, "juice" : 0.50]]
+managedObject.hyp_fill(with: values)
+let expenses = NSKeyedUnarchiver.unarchiveObject(with: managedObject.expenses) as! [String: Any]
 // ==> "cake" : 12.50, "juice" : 0.50
 ```
 
-## Value Transformations
+## Exceptions
 
-Sometimes values in a REST API are not formatted in the way you want them, resulting in you having to extend your model classes with methods and/or properties for transformed values.
+There are two exceptions to this rules:
 
-For example, what if I want to encode this title before setting it to my model?
+* `id`s should match `remoteID`
+* Reserved attributes should be prefixed with the `entityName` (`type` becomes `userType`, `description` becomes `userDescription` and so on). In the JSON they don't need to change, you can keep `type` and `description` for example. A full list of reserved attributes can be found [here](https://github.com/SyncDB/SYNCPropertyMapper/blob/master/Sources/NSManagedObject%2BSYNCPropertyMapper/NSManagedObject%2BSYNCPropertyMapperHelpers.m#L240).
+
+## Custom
+
+![Remote mapping documentation](https://raw.githubusercontent.com/SyncDB/SYNCPropertyMapper/master/GitHub/userInfo_documentation.png)
+
+* If you want to map your Core Data identifier (key) attribute with a JSON attribute that has different naming, you can do by adding `hyper.remoteKey` in the user info box with the value you want to map.
+
+## Deep mapping
 
 ```json
 {
-  "title": "Foo &#038; bar"
+  "id": 1,
+  "name": "John Monad",
+  "company": {
+    "name": "IKEA"
+  }
 }
 ```
 
-This requires your client to handle HTML entitles each time you need `title`, or using transformable attributes which would make your `title` a NSData.
+In this example, if you want to avoid creating a Core Data entity for the company, you could map straight to the company's name. By adding this to the *User Info* of your `companyName` field:
 
-Welp, not anymore!
+```
+hyper.remoteKey = company.name
+```
 
-First, open your Core Data model and the name of your transformer to `hyper.valueTransformer`. For this example we'll use `HYPTitleEncodingValueTransformer`.
+## Dealing with bad APIs
 
-```objc
-#import "HYPTitleEncodingValueTransformer.h"
+Sometimes values in a REST API are not formatted in the way you want them, resulting in you having to extend your model classes with methods and/or properties for transformed values. You might even have to pre-process the JSON so you can use it with **SYNCPropertyMapper**, luckily most of this cases could be solved by using a `ValueTransformer`.
 
-@implementation HYPTitleEncodingValueTransformer
+For example, in my user model instead of getting this:
 
-+ (Class)transformedValueClass {
-    return [NSString class];
+```json
+{
+  "name": "Bob Dylan"
 }
+```
 
-+ (BOOL)allowsReverseTransformation {
-    return YES;
+Our backend developer decided he likes arrays, so we're getting this:
+
+```json
+{
+  "name": [
+    "Bob Dylan"
+  ]
 }
+```
 
-- (id)transformedValue:(id)value {
-    if (value == nil) return nil;
+Since **SYNCPropertyMapper** expects just a `name` with value `Bob Dylan`, we have to pre-process this value before getting it into Core Data. For this, first we'll create a subclass of `ValueTransformer`.
 
-    NSString *stringValue = nil;
+```swift
+import Foundation
 
-    if ([value isKindOfClass:[NSString class]]) {
-        stringValue = (NSString *)value;
-    } else {
-        [NSException raise:NSInternalInconsistencyException
-                    format:@"Value (%@) is not of type NSString.", [value class]];
+class BadAPIValueTransformer : ValueTransformer {
+    override class func transformedValueClass() -> AnyClass {
+        return String.self as! AnyClass
     }
 
-    return [stringValue stringByReplacingOccurrencesOfString:@"&amp;" withString:@"&"];
-}
-
-- (id)reverseTransformedValue:(id)value {
-    if (value == nil) return nil;
-
-    NSString *stringValue = nil;
-
-    if ([value isKindOfClass:[NSString class]]) {
-        stringValue = (NSString *)value;
-    } else {
-        [NSException raise:NSInternalInconsistencyException
-                    format:@"Value (%@) is not of type NSString.", [value class]];
+    override class func allowsReverseTransformation() -> Bool {
+        return true
     }
 
-    return [stringValue stringByReplacingOccurrencesOfString:@"&" withString:@"&amp;"];
+    // Used to transform before inserting into Core Data using `hyp_fill(with:)
+    override func transformedValue(_ value: Any?) -> Any? {
+        guard let valueToTransform = value as? Array<String> else {
+            return value
+        }
+
+        return valueToTransform.first!
+    }
+
+    // Used to transform before exporting into JSON using `hyp_dictionary`
+    override func reverseTransformedValue(_ value: Any?) -> Any? {
+        guard let stringValue = value as? String else { return value }
+
+        return [stringValue]
+    }
 }
-
-@end
 ```
 
-Then before `hyp_fillWithDictionary` we'll do
+Then we'll add another item in the user key of our Core Data attribute. The key will be `hyper.valueTransformer` and the value `BadAPIValueTransformer`.
 
-```objc
-[NSValueTransformer setValueTransformer:[[HYPTitleEncodingValueTransformer alloc] init] forName:@"HYPTitleEncodingValueTransformer"];
+![value-transformer](https://raw.githubusercontent.com/SyncDB/SYNCPropertyMapper/master/GitHub/value-transformer-v2.png)
+
+Then before `hyp_fill(with:)` we'll do
+
+```swift
+ValueTransformer.setValueTransformer(BadAPIValueTransformer(), forName: NSValueTransformerName(rawValue: "BadAPIValueTransformer"))
 ```
 
-That's it! Then your title will be `"Foo & bar"`.
+That's it! Then your name will be `Bob Dylan`, congrats with the Peace Nobel Prize.
 
-It works the other way as well! So using `hyp_dictionary` will return `"Foo &#038; bar"`
+By the way, it works the other way as well! So using `hyp_dictionary` will return `["Bob Dylan"]`.
 
 # JSON representation from a NSManagedObject
 
@@ -242,9 +276,9 @@ That's it, that's all you have to do, the keys will be magically transformed int
 
 ## Excluding
 
-If you don't want to export attribute / relationship, you can prohibit exporting by adding `hyper.nonExportable` in the user info of the excluded attribute.
+If you don't want to export attribute / relationship, you can prohibit exporting by adding `hyper.nonExportable` in the user info of the excluded attribute or relationship.
 
-// TODO: Include photo of user key.
+![non-exportable](https://raw.githubusercontent.com/SyncDB/SYNCPropertyMapper/master/GitHub/non-exportable.png)
 
 ## Relationships
 
@@ -269,8 +303,8 @@ It supports relationships too, and we complain to the Rails rule `accepts_nested
 
 If you don't want to get nested relationships you can also ignore relationships:
 
-```objc
-NSDictionary *dictionary = [user hyp_dictionaryUsingRelationshipType:SYNCPropertyMapperRelationshipTypeNone];
+```swift
+let dictionary = user.hyp_dictionary(using: .none)
 ```
 
 ```json
@@ -280,8 +314,8 @@ NSDictionary *dictionary = [user hyp_dictionaryUsingRelationshipType:SYNCPropert
 
 Or get them as an array:
 
-```objc
-NSDictionary *dictionary = [user hyp_dictionaryUsingRelationshipType:SYNCPropertyMapperRelationshipTypeArray];
+```swift
+let dictionary = user.hyp_dictionary(using: .array)
 ```
 ```json
 "first_name": "John",
@@ -303,7 +337,16 @@ NSDictionary *dictionary = [user hyp_dictionaryUsingRelationshipType:SYNCPropert
 **SYNCPropertyMapper** is available through [CocoaPods](http://cocoapods.org). To install it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'SYNCPropertyMapper'
+use_frameworks!
+
+pod 'SYNCPropertyMapper', '~> 5'
+```
+
+**SYNCPropertyMapper** is also available through [Carthage](https://github.com/Carthage/Carthage). To install
+it, simply add the following line to your Cartfile:
+
+```ruby
+github "SyncDB/SYNCPropertyMapper" ~> 5.0
 ```
 
 ## Contributing

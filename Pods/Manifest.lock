@@ -1,0 +1,30 @@
+PODS:
+  - Alamofire (4.0.1)
+  - DATAStack (6.1.0)
+  - Sync (2.3.1):
+    - DATAStack (~> 6.1.0)
+    - SYNCPropertyMapper (~> 5.0.1)
+  - SYNCPropertyMapper (5.0.1)
+
+DEPENDENCIES:
+  - Alamofire (~> 4.0)
+  - Sync (from `git@github.com:hyperoslo/Sync.git`)
+
+EXTERNAL SOURCES:
+  Sync:
+    :git: git@github.com:hyperoslo/Sync.git
+
+CHECKOUT OPTIONS:
+  Sync:
+    :commit: 75cf2d13ebae6f669287bbd4a76c7faea5734485
+    :git: git@github.com:hyperoslo/Sync.git
+
+SPEC CHECKSUMS:
+  Alamofire: 7682d43245de14874acd142ec137b144aa1dd335
+  DATAStack: 753e2b009ddb8918c6329919f09c1f9d2bcd7cc2
+  Sync: 6926aaf4fda1ae751591a54cff3c2d778bd821bc
+  SYNCPropertyMapper: 316eeeeaad170a7407a82b15989852fcbf1f6573
+
+PODFILE CHECKSUM: cd1b6cc4c1fe833ca338e848a089da600db1831b
+
+COCOAPODS: 1.1.1

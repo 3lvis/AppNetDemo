@@ -1,0 +1,6 @@
+framework module SYNCPropertyMapper {
+  umbrella header "SYNCPropertyMapper-umbrella.h"
+
+  export *
+  module * { export * }
+}

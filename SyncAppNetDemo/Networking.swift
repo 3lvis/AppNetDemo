@@ -34,7 +34,7 @@ class Networking: NSObject {
         self.dataStack.performInNewBackgroundContext { backgroundContext in
             NotificationCenter.default.addObserver(self, selector: #selector(Networking.changeNotification(_:)), name: .NSManagedObjectContextObjectsDidChange, object: backgroundContext)
 
-            Sync.changes(json["data"] as! Array, inEntityNamed: "Data", predicate: nil, parent: nil, inContext: backgroundContext, dataStack: self.dataStack, completion: { error in
+            Sync.changes(json["data"] as! Array, inEntityNamed: "Data", predicate: nil, parent: nil, inContext: backgroundContext, completion: { error in
                 NotificationCenter.default.removeObserver(self, name: .NSManagedObjectContextObjectsDidChange, object: nil)
                 completion(error)
             })
